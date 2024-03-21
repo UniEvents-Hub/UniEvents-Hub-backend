@@ -10,7 +10,7 @@ myenv\Scripts\activate
 
 If you are on Mac then run the following command
 
-source myenv/bin/activate
+source myvenv/bin/activate
 
 Once the virtual environment is activated, for the first time only you need to install all the dependecies by the following commands. Make sure you have that txt file in your current directory
 
