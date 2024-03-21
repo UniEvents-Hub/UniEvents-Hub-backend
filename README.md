@@ -18,3 +18,8 @@ pip install -r requirements.txt
 
 You don't need to install the dependencies after the first time but you must need to activate the virtual environment in order to run the project.
 
+
+To run the server run the command:
+
+python manage.py runserver
+
