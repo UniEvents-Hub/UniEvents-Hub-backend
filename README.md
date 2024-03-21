@@ -6,7 +6,7 @@ python3 -m venv myvenv
 
 If you are on windows you have open a terminal in command prompt not powershell and run the command
 
-myenv\Scripts\activate
+myvenv\Scripts\activate
 
 If you are on Mac then run the following command
 
