@@ -12,9 +12,9 @@ If you are on Mac then run the following command
 
 source myvenv/bin/activate
 
-Once the virtual environment is activated, for the first time only you need to install all the dependecies by the following commands. Make sure you have that txt file in your current directory
+Once the virtual environment is activated, for the first time only you need to install all the dependencies by the following commands. Make sure you have that txt file in your current directory
 
 pip install -r requirements.txt
 
-You don't need to install the dependecies after the first time but you must need to activate the virtual environment in order to run the project.
+You don't need to install the dependencies after the first time but you must need to activate the virtual environment in order to run the project.
 
