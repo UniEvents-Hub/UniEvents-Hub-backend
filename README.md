@@ -37,7 +37,7 @@ Then run the command:
 
 *To create the database for the first time you need to run the following commands:*
 
-**python manage.py makemigraions**
+**python manage.py makemigrations**
 
 **python manage.py migrate**
 
