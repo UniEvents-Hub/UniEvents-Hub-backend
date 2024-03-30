@@ -3,7 +3,7 @@
 This project is built in a python virtual environment so you need to create an virtual environment and activate it.
 First CD into the root directory then run the following commands in the terminal.
 
-python3 -m venv myvenv
+**python3 -m venv myvenv**
 
 If you are on windows you have open a terminal in command prompt not powershell and run the command
 
