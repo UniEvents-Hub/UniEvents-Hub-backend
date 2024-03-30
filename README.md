@@ -17,7 +17,7 @@ Once the virtual environment is activated, **for the first time only** you need 
 
 **pip install -r requirements.txt**
 
-* You don't need to install the dependencies after the first time but you must need to activate the virtual environment in order to run the project *
+*You don't need to install the dependencies after the first time but you must need to activate the virtual environment in order to run the project*
 
 
 
