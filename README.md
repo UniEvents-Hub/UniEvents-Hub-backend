@@ -44,6 +44,7 @@ Then run the command:
 ## Create a superuser
 **python manage.py createsuperuser**
 
+## Run the server
 To run the server run the command:
 **python manage.py runserver**
 
