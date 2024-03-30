@@ -28,7 +28,7 @@ Once the virtual environment is activated, **for the first time only** you need 
 3. Make a new database **mm802** in the MySQL server
 4. Keep the server running or workbench running
 
-##Running the server 
+## Running the server 
 
 Then run the command:
 **cd src**
