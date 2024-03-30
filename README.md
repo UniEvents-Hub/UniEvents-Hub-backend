@@ -1,19 +1,19 @@
 # UniEvents-Hub-backend
 ### Creating and Using Virtual Environment
-This project is built in a python virtual environment so you need to create an virtual environment and activate it.
+This project is built in a python virtual environment so you need to create a virtual environment and activate it.
 First CD into the root directory then run the following commands in the terminal.
 
 **python3 -m venv myvenv**
 
-If you are on windows you have open a terminal in command prompt not powershell and run the command
+If you are on Windows you have to open a terminal in the command prompt not Powershell and run the command
 
-myvenv\Scripts\activate
+**myvenv\Scripts\activate**
 
 If you are on Mac then run the following command
 
-source myvenv/bin/activate
+**source myvenv/bin/activate**
 
-Once the virtual environment is activated, for the first time only you need to install all the dependencies by the following commands. Make sure you have that txt file in your current directory
+Once the virtual environment is activated, **for the first time only** you need to install all the dependencies by the following commands. Make sure you have that txt file in your current directory
 
 pip install -r requirements.txt
 
