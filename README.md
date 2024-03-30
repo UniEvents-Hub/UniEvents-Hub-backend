@@ -19,13 +19,13 @@ Once the virtual environment is activated, **for the first time only** you need 
 
 *You don't need to install the dependencies after the first time but you must need to activate the virtual environment in order to run the project*
 
+##Managing and Creating MySQL database
 
+*For the first time, you need to follow these steps:*
 
-Then for the first time you need to follow this steps:
-
-1. you need the MySQL installed, try to add MySQL workbench aswell
-2. The root user should have the password, if you think you want to change the user and password then change the setting accordingly in the settings.py
-3. Make a new database mm802 in the MySQL server
+1. You need to install MySQL and try to add MySQL workbench as well.
+2. The **root** user should have the password as **"password"**, if you think you want to change the user and password then change the setting accordingly in the **settings.py** which is located inside the **src/rest_practice**.
+3. Make a new database **mm802** in the MySQL server
 4. Keep the server running or workbench running
 
 Then run the command:
