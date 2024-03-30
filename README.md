@@ -34,6 +34,7 @@ Then run the command:
 **cd src**
 
 *To create the database for the first time you need to run the following commands:*
+
 **python manage.py makemigraions**
 
 **python manage.py migrate**
