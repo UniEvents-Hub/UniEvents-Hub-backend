@@ -19,7 +19,7 @@ Once the virtual environment is activated, **for the first time only** you need 
 
 *You don't need to install the dependencies after the first time but you must need to activate the virtual environment in order to run the project*
 
-##Managing and Creating MySQL database
+## Managing and Creating MySQL database
 
 *For the first time, you need to follow these steps:*
 
@@ -28,11 +28,15 @@ Once the virtual environment is activated, **for the first time only** you need 
 3. Make a new database **mm802** in the MySQL server
 4. Keep the server running or workbench running
 
-Then run the command:
+##Running the server 
 
-cd src
+Then run the command:
+**cd src**
+
+*To create the database for the first time you need to run the following commands:*
+**python manage.py makemigraions**
+**python manage.py migrate**
 
 To run the server run the command:
-
-python manage.py runserver
+**python manage.py runserver**
 
