@@ -32,8 +32,6 @@ Once the virtual environment is activated, **for the first time only** you need 
 
 ## Running the server 
 
-Then run the command:
-**cd code**
 
 *To create the database for the first time you need to run the following commands:*
 
