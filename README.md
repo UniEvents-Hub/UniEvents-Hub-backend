@@ -28,15 +28,21 @@ Once the virtual environment is activated, **for the first time only** you need 
 3. Make a new database **mm802** in the MySQL server
 4. Keep the server running or workbench running
 
+
+
 ## Running the server 
 
-Then run the command:
-**cd src**
 
 *To create the database for the first time you need to run the following commands:*
-**python manage.py makemigraions**
+
+**python manage.py makemigrations**
+
 **python manage.py migrate**
 
+## Create a superuser
+**python manage.py createsuperuser**
+
+## Run the server
 To run the server run the command:
 **python manage.py runserver**
 
