@@ -10,6 +10,8 @@ from rest_framework.generics import UpdateAPIView
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework import permissions
+import base64
+from django.core.files.base import ContentFile
 
 class IsEventCreator(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -75,6 +77,17 @@ class EventUpdateAPIView(UpdateAPIView):
     def partial_update(self, request, *args, **kwargs):
         # No changes required here, logic remains the same for patching the retrieved object
         instance = self.get_object()
+        base64_image = request.data.get('banner', None)
+        if base64_image:
+            # Decode the base64 image data
+            image_data = base64.b64decode(base64_image)
+
+            # Create a ContentFile instance with the image data
+            file_name = f"{instance.id}_event_banner.png"
+            content_file = ContentFile(image_data, name=file_name)
+
+            # Update the request data with the ContentFile instance
+            request.data['banner'] = content_file
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
