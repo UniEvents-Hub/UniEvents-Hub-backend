@@ -12,6 +12,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework import permissions
 import base64
 from django.core.files.base import ContentFile
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class IsEventCreator(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -78,6 +79,7 @@ class EventUpdateAPIView(UpdateAPIView):
         # No changes required here, logic remains the same for patching the retrieved object
         instance = self.get_object()
         base64_image = request.data.get('banner', None)
+        print(base64_image)
         if base64_image and isinstance(base64_image, str):
             # Decode the base64 image data
             image_data = base64.b64decode(base64_image)

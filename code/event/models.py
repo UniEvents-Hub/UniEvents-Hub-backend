@@ -6,11 +6,14 @@ from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.contrib.auth.models import User
 
+def upload_to(instance, filename):
+    return 'images/{filename}'.format(filename=filename)
+
 class Event(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     event_type = models.CharField(max_length=100, default='music')
-    banner = models.ImageField(upload_to='event_banners/', null=True, blank=True)
+    banner = models.ImageField(upload_to=upload_to, blank=True, null=True)  
     title = models.CharField(max_length=100)
     date = models.DateField()
     start_time = models.TimeField(null=True, blank=True) 
