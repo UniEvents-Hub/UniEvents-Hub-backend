@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework import status
 from six import text_type
-from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import UpdateAPIView,RetrieveUpdateAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import NotFound
 import json
@@ -70,20 +70,21 @@ class UpdateUserProfileAPIView(UpdateAPIView):
         response_data = {**temp1, **temp2}
         return Response(response_data, status=status.HTTP_200_OK)
     
-class UserProfileRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
-    serializer_class = UserProfileSerializer
-    permission_classes = [IsAuthenticated]  # Require authentication for retrieving and updating user profiles
+class UserProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]  
 
     def get_queryset(self):
-        # Filter the queryset to retrieve only the profile of the currently authenticated user
-        return UserProfile.objects.filter(user=self.request.user)
-    
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        user_instance = instance.user  # Get the related User instance
+        return User.objects.filter(username=self.request.user)
 
-        user_serializer = UserSerializer(user_instance)  # Serialize User instance
-        profile_serializer = self.get_serializer(instance)  # Serialize UserProfile instance
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()  # Retrieve the UserProfile instance
+        # Retrieve the related User instance
+        user_serializer = UserSerializer(instance)  
+        
+
+        # Serialize UserProfile instance
+        profile_serializer = UserProfileSerializer(instance.userprofile)  
 
         # Combine data from both serializers
         data = {
