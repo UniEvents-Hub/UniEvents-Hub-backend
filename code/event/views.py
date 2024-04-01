@@ -65,6 +65,7 @@ class UserEventRetrieveAPIView(generics.RetrieveAPIView):
 class EventUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated, IsEventCreator]  # Require authentication and check if the user is the event creator
     serializer_class = EventSerializer
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_object(self):
         event_id = self.kwargs.get('pk')  # Get event ID from URL argument
@@ -106,16 +107,15 @@ class EventListAPIView(APIView):
             return Response({'error': 'Invalid JSON data'}, status=400)
         
         # Fetch all rows of the desired table
-        if filter_column_value:
+        if filter_column_value == "all":
             # Filter the queryset based on the filter column value
-            queryset = Event.objects.filter(event_type=filter_column_value)
+            queryset = Event.objects.all()
         else:
             # No filter parameter provided, return all rows
-            queryset = Event.objects.all()
+            queryset = Event.objects.filter(event_type=filter_column_value)
         
         # Serialize the queryset
         serializer = EventSerializer(queryset, many=True)
-        
         # Return the serialized data as JSON
         return Response(serializer.data)
     
