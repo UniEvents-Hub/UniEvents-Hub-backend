@@ -78,7 +78,7 @@ class EventUpdateAPIView(UpdateAPIView):
         # No changes required here, logic remains the same for patching the retrieved object
         instance = self.get_object()
         base64_image = request.data.get('banner', None)
-        if base64_image:
+        if base64_image and isinstance(base64_image, str):
             # Decode the base64 image data
             image_data = base64.b64decode(base64_image)
 
