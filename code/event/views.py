@@ -2,8 +2,8 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny,IsAuthenticated  # Import AllowAny permission
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
-from .models import Event, Ticket
-from .serializers import EventSerializer, TicketSerializer
+from .models import Event, Ticket, Saved
+from .serializers import EventSerializer, TicketSerializer,SavedSerializer
 from rest_framework.response import Response
 import json
 from rest_framework.generics import UpdateAPIView
@@ -141,3 +141,25 @@ class UserTicketAPIView(generics.RetrieveAPIView):
             return Response(serializer.data)
         else:
             return Response({'error': 'No user id provided'}, status=400)
+
+class SavedCreateAPIView(generics.CreateAPIView):
+    queryset = Saved.objects.all()
+    serializer_class = SavedSerializer
+    permission_classes = [IsAuthenticated]  # Adjust permissions as needed
+
+class UserSavedAPIView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated] 
+
+    def get(self, request):
+        try:
+            filter_column_value = request.query_params.get('user_id')
+        except ValueError:
+            return Response({'error': 'Invalid user id'}, status=400)
+        
+        if filter_column_value:
+            queryset = Saved.objects.filter(user=filter_column_value)
+            serializer = SavedSerializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'No user id provided'}, status=400)
+        

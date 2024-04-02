@@ -15,8 +15,10 @@ import json
 import base64
 from django.core.files.base import ContentFile
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from rest_framework import permissions
 from rest_framework.views import APIView
+from event.permissions import IsOwnerOrReadOnly
+
 
 
 
@@ -42,7 +44,7 @@ class CreateUserView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UpdateUserProfileAPIView(UpdateAPIView):
-    permission_classes = [IsAuthenticated]  # Require authentication for listing and creating user profiles
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]  # Require authentication for listing and creating user profiles
     serializer_class = UserProfileSerializer
     parser_classes = (MultiPartParser, FormParser)
     def get_object(self):
@@ -93,7 +95,7 @@ class UpdateUserProfileAPIView(UpdateAPIView):
     
 class UserProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]  
+    permission_classes = [IsAuthenticated,IsOwnerOrReadOnly]  
 
     def get_queryset(self):
         return User.objects.filter(username=self.request.user)
