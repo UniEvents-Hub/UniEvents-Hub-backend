@@ -80,7 +80,6 @@ class EventUpdateAPIView(UpdateAPIView):
         # No changes required here, logic remains the same for patching the retrieved object
         instance = self.get_object()
         base64_image = request.data.get('banner', None)
-        print(base64_image)
         if base64_image and isinstance(base64_image, str):
             # Decode the base64 image data
             image_data = base64.b64decode(base64_image)
@@ -91,6 +90,7 @@ class EventUpdateAPIView(UpdateAPIView):
 
             # Update the request data with the ContentFile instance
             request.data['banner'] = content_file
+        
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()

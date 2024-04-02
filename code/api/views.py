@@ -14,6 +14,12 @@ from rest_framework.exceptions import NotFound
 import json
 import base64
 from django.core.files.base import ContentFile
+from rest_framework.parsers import MultiPartParser, FormParser
+
+from rest_framework.views import APIView
+
+
+
 
 # Create your views here.
 class CreateUserView(generics.CreateAPIView):
@@ -38,7 +44,7 @@ class CreateUserView(generics.CreateAPIView):
 class UpdateUserProfileAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]  # Require authentication for listing and creating user profiles
     serializer_class = UserProfileSerializer
-    
+    parser_classes = (MultiPartParser, FormParser)
     def get_object(self):
         user_id = self.kwargs.get('pk')  # Get event ID from URL argument
         if user_id is None:
@@ -61,7 +67,7 @@ class UpdateUserProfileAPIView(UpdateAPIView):
         # No changes required here, logic remains the same for patching the retrieved object
         instance = self.get_object()
         base64_image = request.data.get('profile_photo', None)
-        if base64_image:
+        if base64_image and isinstance(base64_image, str):
             # Decode the base64 image data
             image_data = base64.b64decode(base64_image)
 
@@ -71,6 +77,8 @@ class UpdateUserProfileAPIView(UpdateAPIView):
 
             # Update the request data with the ContentFile instance
             request.data['profile_photo'] = content_file
+        
+        print(request.data)
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
