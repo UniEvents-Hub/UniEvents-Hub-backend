@@ -2,8 +2,8 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny,IsAuthenticated  # Import AllowAny permission
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
-from .models import Event, Ticket
-from .serializers import EventSerializer, TicketSerializer
+from .models import Event, Ticket, Saved
+from .serializers import EventSerializer, TicketSerializer,SavedSerializer
 from rest_framework.response import Response
 import json
 from rest_framework.generics import UpdateAPIView
@@ -80,7 +80,6 @@ class EventUpdateAPIView(UpdateAPIView):
         # No changes required here, logic remains the same for patching the retrieved object
         instance = self.get_object()
         base64_image = request.data.get('banner', None)
-        print(base64_image)
         if base64_image and isinstance(base64_image, str):
             # Decode the base64 image data
             image_data = base64.b64decode(base64_image)
@@ -91,6 +90,7 @@ class EventUpdateAPIView(UpdateAPIView):
 
             # Update the request data with the ContentFile instance
             request.data['banner'] = content_file
+        
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -123,7 +123,26 @@ class EventListAPIView(APIView):
 class TicketCreateAPIView(generics.CreateAPIView):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
-    permission_classes = [IsAuthenticated]  # Adjust permissions as needed
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        # Decrease ticket_number
+        event_id = request.data.get('event')
+        if event_id:
+            try:
+                ticket = Ticket.objects.filter(event=event_id).order_by('ticket_number').first()
+                print(ticket)
+                if ticket:
+                    ticket.ticket_number -= request.data.get("ticket_number")
+                    ticket.save()
+                else:
+                    return Response({"error": "No available tickets for this event"}, status=status.HTTP_400_BAD_REQUEST)
+            except Ticket.DoesNotExist:
+                return Response({"error": "Ticket not found"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"error": "Event ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return super().create(request, *args, **kwargs)
     
     
 class UserTicketAPIView(generics.RetrieveAPIView):
@@ -141,3 +160,25 @@ class UserTicketAPIView(generics.RetrieveAPIView):
             return Response(serializer.data)
         else:
             return Response({'error': 'No user id provided'}, status=400)
+
+class SavedCreateAPIView(generics.CreateAPIView):
+    queryset = Saved.objects.all()
+    serializer_class = SavedSerializer
+    permission_classes = [IsAuthenticated]  # Adjust permissions as needed
+
+class UserSavedAPIView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated] 
+
+    def get(self, request):
+        try:
+            filter_column_value = request.query_params.get('user_id')
+        except ValueError:
+            return Response({'error': 'Invalid user id'}, status=400)
+        
+        if filter_column_value:
+            queryset = Saved.objects.filter(user=filter_column_value)
+            serializer = SavedSerializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'No user id provided'}, status=400)
+        
