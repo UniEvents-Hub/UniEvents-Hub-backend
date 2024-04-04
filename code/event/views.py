@@ -121,19 +121,19 @@ class EventListAPIView(APIView):
     
     
 class TicketCreateAPIView(generics.CreateAPIView):
-    queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
+    queryset = Event.objects.all()
 
     def create(self, request, *args, **kwargs):
         # Decrease ticket_number
         event_id = request.data.get('event')
         if event_id:
             try:
-                ticket = Ticket.objects.filter(event=event_id).order_by('ticket_number').first()
+                ticket = Event.objects.filter(id=event_id).order_by('total_tickets').first()
                 print(ticket)
-                if ticket:
-                    ticket.ticket_number -= request.data.get("ticket_number")
+                if ticket.total_tickets-request.data.get("ticket_number")>=0:
+                    ticket.total_tickets -= request.data.get("ticket_number")
                     ticket.save()
                 else:
                     return Response({"error": "No available tickets for this event"}, status=status.HTTP_400_BAD_REQUEST)
