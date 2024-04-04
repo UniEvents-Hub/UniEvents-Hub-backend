@@ -171,8 +171,19 @@ class UserSavedAPIView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = EventSerializer(queryset, many=True)
-        return Response(serializer.data)
+        saved_serializer = SavedSerializer(queryset, many=True)
+        
+        # Serialize each related event individually
+        event_data = []
+        for saved_item in queryset:
+            event_data.append(EventSerializer(saved_item.event).data)
+        
+        # Combine saved data with event details
+        response_data = []
+        for saved, event in zip(saved_serializer.data, event_data):
+            response_data.append({**saved, 'event': event})
+        
+        return Response(response_data)
         
 
 class UserUnsaveAPIView(generics.RetrieveDestroyAPIView):
