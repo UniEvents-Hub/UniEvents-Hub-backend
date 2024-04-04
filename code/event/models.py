@@ -5,7 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 
 from django.db import models
 from django.contrib.auth.models import User
-import uuid
+
 
 def upload_to(instance, filename):
     return 'images/{filename}'.format(filename=filename)
@@ -53,7 +53,7 @@ class Event(models.Model):
             return AnonymousUser()  # Return AnonymousUser if request object is not available
 
 class Ticket(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     ticket_number = models.IntegerField()

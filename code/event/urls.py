@@ -12,5 +12,5 @@ urlpatterns = [
     path('getticket/', UserTicketAPIView.as_view(), name="get-ticket"),
     path('eventsave/', SavedCreateAPIView.as_view(), name="save-event"),
     path('getsaved/', UserSavedAPIView.as_view(), name="user-saved"),
-    path('eventunsave/', UserUnsaveAPIView.as_view(), name="unsave-event")       
+    path('eventunsave/<int:pk>/', UserUnsaveAPIView.as_view(), name="unsave-event")       
 ]
