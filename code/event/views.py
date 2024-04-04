@@ -145,17 +145,31 @@ class TicketCreateAPIView(generics.CreateAPIView):
         return super().create(request, *args, **kwargs)
     
     
-class UserTicketAPIView(generics.RetrieveAPIView):
+class UserTicketAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated] 
 
-    def get(self, request):
-        user_id = request.user.id
-        # Retrieve event IDs from the user's tickets
-        event_ids = Ticket.objects.filter(user=user_id).values_list('event', flat=True)
-        # Fetch event details related to the retrieved event IDs
-        queryset = Event.objects.filter(id__in=event_ids)
-        serializer = EventSerializer(queryset, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        user_id = self.request.query_params.get('user_id')
+        print(user_id)
+        return Ticket.objects.filter(user=user_id)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        Ticket_serializer = TicketSerializer(queryset, many=True)
+        
+        # Serialize each related event individually
+        event_data = []
+        for ticket in queryset:
+            event_data.append(EventSerializer(ticket.event).data)
+        
+        # Combine ticket data with event details
+        response_data = []
+        for ticket, event in zip(Ticket_serializer.data, event_data):
+            response_data.append({**ticket, 'event': event})
+        
+        return Response(response_data)
+
+    
 
 class SavedCreateAPIView(generics.CreateAPIView):
     queryset = Saved.objects.all()
