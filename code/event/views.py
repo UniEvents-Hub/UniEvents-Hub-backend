@@ -177,8 +177,33 @@ class UserSavedAPIView(generics.RetrieveAPIView):
         
         if filter_column_value:
             queryset = Saved.objects.filter(user=filter_column_value)
-            serializer = SavedSerializer(queryset, many=True)
+            serializer = EventSerializer(queryset, many=True)
             return Response(serializer.data)
         else:
             return Response({'error': 'No user id provided'}, status=400)
         
+
+class UserUnsaveAPIView(generics.RetrieveDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavedSerializer
+    
+    def get_queryset(self):
+        user_id = self.request.user.id
+        print(self.request)
+        return Saved.objects.filter(user=user_id)
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = SavedSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            print(instance)
+            self.perform_destroy(instance)
+        except Saved.DoesNotExist:
+            return Response({'error': 'Saved item not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'success': 'Item unsaved'}, status=status.HTTP_204_NO_CONTENT)
+    
+    
