@@ -166,21 +166,17 @@ class SavedCreateAPIView(generics.CreateAPIView):
     serializer_class = SavedSerializer
     permission_classes = [IsAuthenticated]  # Adjust permissions as needed
 
-class UserSavedAPIView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated] 
+class UserSavedAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        try:
-            filter_column_value = request.query_params.get('user_id')
-        except ValueError:
-            return Response({'error': 'Invalid user id'}, status=400)
-        
-        if filter_column_value:
-            queryset = Saved.objects.filter(user=filter_column_value)
-            serializer = EventSerializer(queryset, many=True)
-            return Response(serializer.data)
-        else:
-            return Response({'error': 'No user id provided'}, status=400)
+    def get_queryset(self):
+        user_id = self.request.user.id
+        return Event.objects.filter(user=user_id)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = EventSerializer(queryset, many=True)
+        return Response(serializer.data)
         
 
 class UserUnsaveAPIView(generics.RetrieveDestroyAPIView):
