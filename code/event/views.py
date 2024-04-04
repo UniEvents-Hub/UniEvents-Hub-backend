@@ -149,17 +149,13 @@ class UserTicketAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated] 
 
     def get(self, request):
-        try:
-            filter_column_value = request.query_params.get('user_id')
-        except ValueError:
-            return Response({'error': 'Invalid user id'}, status=400)
-        
-        if filter_column_value:
-            queryset = Ticket.objects.filter(user=filter_column_value)
-            serializer = TicketSerializer(queryset, many=True)
-            return Response(serializer.data)
-        else:
-            return Response({'error': 'No user id provided'}, status=400)
+        user_id = request.user.id
+        # Retrieve event IDs from the user's tickets
+        event_ids = Ticket.objects.filter(user=user_id).values_list('event', flat=True)
+        # Fetch event details related to the retrieved event IDs
+        queryset = Event.objects.filter(id__in=event_ids)
+        serializer = EventSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 class SavedCreateAPIView(generics.CreateAPIView):
     queryset = Saved.objects.all()
