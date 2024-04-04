@@ -167,7 +167,7 @@ class UserSavedAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.request.user.id
-        return Event.objects.filter(user=user_id)
+        return Saved.objects.filter(user=user_id)
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
