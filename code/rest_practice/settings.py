@@ -43,6 +43,15 @@ DEBUG = True
 #ALLOWED_HOSTS = ['f14f-68-148-141-10.ngrok-free.app']
 ALLOWED_HOSTS = ["*"]
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'shovon6446@gmail.com'
+EMAIL_HOST_PASSWORD = 'eyrfghbhavcpqkjc'
+
+
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",

@@ -15,6 +15,9 @@ from django.core.files.base import ContentFile
 from rest_framework.parsers import MultiPartParser, FormParser
 import stripe 
 from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.contrib.auth.models import User
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -135,7 +138,6 @@ class TicketCreateAPIView(generics.CreateAPIView):
         if event_id:
             try:
                 ticket = Event.objects.filter(id=event_id).order_by('total_tickets').first()
-                print(ticket)
                 if ticket.total_tickets-request.data.get("ticket_number")>=0:
                     ticket.total_tickets -= request.data.get("ticket_number")
                     ticket.save()
@@ -146,15 +148,33 @@ class TicketCreateAPIView(generics.CreateAPIView):
         else:
             return Response({"error": "Event ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return super().create(request, *args, **kwargs)
-    
+        response =  super().create(request, *args, **kwargs)
+        # Retrieve event details for email content
+        event_data = EventSerializer(ticket).data
+        response = {**response.data, **event_data}
+        # Send email to the user
+        ticket_data = response
+        user_id = self.request.user.id
+        user = User.objects.get(id=user_id)
+        email = user.email
+        subject = 'Ticket Purchase Confirmation'
+        message = render_to_string('ticket_email.html', {'ticket_data': ticket_data})
+        from_email = 'shovon6446@gmail.com'  # Change this to your email address
+        to_email = [email]
+        send_mail(subject, message, from_email, to_email, fail_silently=True)
+        
+        #response = {**response.data, **event_data}
+        
+        
+        
+        return Response({"success": "Ticket purchase successful", "ticket": response}, status=status.HTTP_201_CREATED)
+
     
 class UserTicketAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated] 
 
     def get_queryset(self):
         user_id = self.request.query_params.get('user_id')
-        print(user_id)
         return Ticket.objects.filter(user=user_id)
 
     def list(self, request, *args, **kwargs):
