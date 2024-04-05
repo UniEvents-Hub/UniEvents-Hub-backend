@@ -1,52 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ticket Confirmation</title>
-    <style>
-      /* Add your CSS styles here */
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        color: #333;
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        max-width: 600px;
-        margin: 20px auto;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      h1 {
-        color: #007bff;
-      }
-      p {
-        margin-bottom: 20px;
-      }
-      /* Add more styles as needed */
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Ticket Confirmation</h1>
-      <p>Dear {{ user.username }},</p>
-      <p>
-        Your ticket for the event "{{ ticket_data.title }}" has been
-        successfully booked. Here are the details:
-      </p>
-      <ul>
-        <li>Event: {{ ticket_data.title }}</li>
-        <li>Date: {{ ticket_data.date }}</li>
-        <li>Time: {{ ticket_data.start_time }} - {{ ticket_data.end_time }}</li>
-        <li>Location: {{ ticket_data.address }}</li>
-        <li>Ticket Number: {{ ticket_data.ticket_number }}</li>
-        <li>Total Cost: {{ ticket_data.total_cost }}</li>
-      </ul>
-      <p>Thank you for booking with us!</p>
-    </div>
-  </body>
-</html>
+<h1>Ticket Confirmation</h1>
+Dear {{ user.username }}, Your ticket for the event "{{ ticket_data.title }}"
+has been successfully booked.Here are the details:
+
+Event: {{ ticket_data.title }}
+Date: {{ ticket_data.date }}
+Time: {{ ticket_data.start_time }} - {{ ticket_data.end_time }}
+Location: {{ ticket_data.address }}</li>
+Ticket Number: {{ ticket_data.ticket_number }}
+Total Cost: {{ ticket_data.total_cost }}
+
+Thank you for booking with us!

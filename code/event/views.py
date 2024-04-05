@@ -18,6 +18,13 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.contrib.auth.models import User
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib import colors
+from django.core.mail.message import EmailMessage
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -157,11 +164,49 @@ class TicketCreateAPIView(generics.CreateAPIView):
         user_id = self.request.user.id
         user = User.objects.get(id=user_id)
         email = user.email
-        subject = 'Ticket Purchase Confirmation'
-        message = render_to_string('ticket_email.html', {'ticket_data': ticket_data})
-        from_email = 'shovon6446@gmail.com'  # Change this to your email address
-        to_email = [email]
-        send_mail(subject, message, from_email, to_email, fail_silently=True)
+        
+        #subject = 'Ticket Purchase Confirmation'
+        #message = render_to_string('ticket_email.html', {'ticket_data': ticket_data})
+        #from_email = 'shovon6446@gmail.com'  # Change this to your email address
+        #to_email = [email]
+        #send_mail(subject, message, from_email, to_email, fail_silently=True)
+        
+         # Generate email content
+        html_content = render_to_string('ticket_email.html', {'ticket_data': ticket_data, 'user': user})
+        text_content = strip_tags(html_content)
+         # Generate PDF
+        pdf_buffer = BytesIO()
+        pdf_doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+        elements = []
+        data = [
+            ['Event', 'Date', 'Time', 'Location', 'Ticket Number', 'Total Cost'],
+            [ticket_data['title'], ticket_data['date'], f"{ticket_data['start_time']} - {ticket_data['end_time']}", ticket_data['address'], ticket_data['ticket_number'], ticket_data['total_cost']]
+        ]
+        table = Table(data)
+        table_style = TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.grey),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 14),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+            ('GRID', (0,0), (-1,-1), 1, colors.black)
+        ])
+        table.setStyle(table_style)
+        elements.append(table)
+        pdf_doc.build(elements)
+
+        # Attach PDF to email
+        email = EmailMessage(
+            subject='Ticket Purchase Confirmation',
+            body=text_content,
+            from_email='shovon6446@gmail.com',
+            to=[email]
+        )
+        email.attach('ticket.pdf', pdf_buffer.getvalue(), 'application/pdf')
+        email.send(fail_silently=True)
+        
         
         #response = {**response.data, **event_data}
         
