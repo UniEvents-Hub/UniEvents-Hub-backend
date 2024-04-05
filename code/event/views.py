@@ -201,26 +201,34 @@ class UserSavedAPIView(generics.ListAPIView):
         
 
 class UserUnsaveAPIView(generics.RetrieveDestroyAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = SavedSerializer
-    
+
     def get_queryset(self):
         user_id = self.request.user.id
-        print(self.request)
         return Saved.objects.filter(user=user_id)
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        data = json.loads(self.request.body)
+        user_id = data.get('user')
+        event_id = data.get('event')
+
+        obj = queryset.filter(user=user_id, event=event_id).first()
+        if obj:
+            return obj
+        else:
+            raise Saved.DoesNotExist
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer = SavedSerializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            print(instance)
             self.perform_destroy(instance)
+            return Response({'success': 'Item unsaved'}, status=status.HTTP_204_NO_CONTENT)
         except Saved.DoesNotExist:
             return Response({'error': 'Saved item not found'}, status=status.HTTP_404_NOT_FOUND)
-        return Response({'success': 'Item unsaved'}, status=status.HTTP_204_NO_CONTENT)
-    
-    
