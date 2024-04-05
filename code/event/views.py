@@ -13,6 +13,10 @@ from rest_framework import permissions
 import base64
 from django.core.files.base import ContentFile
 from rest_framework.parsers import MultiPartParser, FormParser
+import stripe 
+from django.conf import settings
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class IsEventCreator(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -232,3 +236,49 @@ class UserUnsaveAPIView(generics.RetrieveDestroyAPIView):
             return Response({'success': 'Item unsaved'}, status=status.HTTP_204_NO_CONTENT)
         except Saved.DoesNotExist:
             return Response({'error': 'Saved item not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+class CheckSavedAPIView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user_id = self.request.user.id
+        return Saved.objects.filter(user=user_id)
+
+    def retrieve(self, request, *args, **kwargs):
+        event_id = kwargs.get('event_id')
+        queryset = self.get_queryset()
+
+        # Check if the user has saved the event
+        saved = queryset.filter(event=event_id).exists()
+
+        if saved:
+            return Response({'saved': True}, status=status.HTTP_200_OK)
+        else:
+            return Response({'saved': False}, status=status.HTTP_200_OK)
+        
+
+class CreateCheckoutSessionView(APIView):
+    def post(self, request):
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price_data': {
+                            'currency': 'cad',
+                            'product_data': {
+                                'name': 'Your product name',
+                            },
+                            'unit_amount': 2000,  # Amount in cents
+                        },
+                        'quantity': 1,
+                    },
+                ],
+                mode='payment',
+                success_url='https://your.site.com/success',
+                cancel_url='https://your.site.com/cancel',
+            )
+            return Response({'sessionId': checkout_session.id})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

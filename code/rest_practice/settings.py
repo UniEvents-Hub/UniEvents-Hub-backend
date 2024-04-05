@@ -15,6 +15,9 @@ from datetime import timedelta
 from dotenv import load_dotenv
 import os
 
+STRIPE_SECRET_KEY="pk_test_51Oxm0MIeXuIbhfHwnkGxrfUEwVLWENG1P0hN7sMgqng00WPvkqrqtCa9J8KR4Sz8iieB19l8UNdBKdqVIk3nrp9O00x9j7lG6g"
+STRIPE_PUBLISHABLE_KEY="sk_test_51Oxm0MIeXuIbhfHwtDoQq2YwpDie4nnnEg3kJaqzdg1DvQFIgblMhQjnLCoAAeRDa8GITU8cwvdlphr2OaaKArc1008tmqsE5g"
+
 load_dotenv()
 
 
