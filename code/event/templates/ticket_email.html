@@ -1,0 +1,12 @@
+<h1>Ticket Confirmation</h1>
+Dear {{ user.username }}, Your ticket for the event "{{ ticket_data.title }}"
+has been successfully booked.Here are the details:
+
+Event: {{ ticket_data.title }}
+Date: {{ ticket_data.date }}
+Time: {{ ticket_data.start_time }} - {{ ticket_data.end_time }}
+Location: {{ ticket_data.address }}</li>
+Ticket Number: {{ ticket_data.ticket_number }}
+Total Cost: {{ ticket_data.total_cost }}
+
+Thank you for booking with us!

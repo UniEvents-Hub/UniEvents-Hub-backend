@@ -13,6 +13,20 @@ from rest_framework import permissions
 import base64
 from django.core.files.base import ContentFile
 from rest_framework.parsers import MultiPartParser, FormParser
+import stripe 
+from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.contrib.auth.models import User
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib import colors
+from django.core.mail.message import EmailMessage
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class IsEventCreator(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -131,7 +145,6 @@ class TicketCreateAPIView(generics.CreateAPIView):
         if event_id:
             try:
                 ticket = Event.objects.filter(id=event_id).order_by('total_tickets').first()
-                print(ticket)
                 if ticket.total_tickets-request.data.get("ticket_number")>=0:
                     ticket.total_tickets -= request.data.get("ticket_number")
                     ticket.save()
@@ -142,15 +155,71 @@ class TicketCreateAPIView(generics.CreateAPIView):
         else:
             return Response({"error": "Event ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return super().create(request, *args, **kwargs)
-    
+        response =  super().create(request, *args, **kwargs)
+        # Retrieve event details for email content
+        event_data = EventSerializer(ticket).data
+        response = {**response.data, **event_data}
+        # Send email to the user
+        ticket_data = response
+        user_id = self.request.user.id
+        user = User.objects.get(id=user_id)
+        email = user.email
+        
+        #subject = 'Ticket Purchase Confirmation'
+        #message = render_to_string('ticket_email.html', {'ticket_data': ticket_data})
+        #from_email = 'shovon6446@gmail.com'  # Change this to your email address
+        #to_email = [email]
+        #send_mail(subject, message, from_email, to_email, fail_silently=True)
+        
+         # Generate email content
+        html_content = render_to_string('ticket_email.html', {'ticket_data': ticket_data, 'user': user})
+        text_content = strip_tags(html_content)
+         # Generate PDF
+        pdf_buffer = BytesIO()
+        pdf_doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+        elements = []
+        data = [
+            ['Event', 'Date', 'Time', 'Location', 'Ticket Number', 'Total Cost'],
+            [ticket_data['title'], ticket_data['date'], f"{ticket_data['start_time']} - {ticket_data['end_time']}", ticket_data['address'], ticket_data['ticket_number'], ticket_data['total_cost']]
+        ]
+        table = Table(data)
+        table_style = TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.grey),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,0), 14),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+            ('GRID', (0,0), (-1,-1), 1, colors.black)
+        ])
+        table.setStyle(table_style)
+        elements.append(table)
+        pdf_doc.build(elements)
+
+        # Attach PDF to email
+        email = EmailMessage(
+            subject='Ticket Purchase Confirmation',
+            body=text_content,
+            from_email='shovon6446@gmail.com',
+            to=[email]
+        )
+        email.attach('ticket.pdf', pdf_buffer.getvalue(), 'application/pdf')
+        email.send(fail_silently=True)
+        
+        
+        #response = {**response.data, **event_data}
+        
+        
+        
+        return Response({"success": "Ticket purchase successful", "ticket": response}, status=status.HTTP_201_CREATED)
+
     
 class UserTicketAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated] 
 
     def get_queryset(self):
         user_id = self.request.query_params.get('user_id')
-        print(user_id)
         return Ticket.objects.filter(user=user_id)
 
     def list(self, request, *args, **kwargs):
@@ -232,3 +301,49 @@ class UserUnsaveAPIView(generics.RetrieveDestroyAPIView):
             return Response({'success': 'Item unsaved'}, status=status.HTTP_204_NO_CONTENT)
         except Saved.DoesNotExist:
             return Response({'error': 'Saved item not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+class CheckSavedAPIView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user_id = self.request.user.id
+        return Saved.objects.filter(user=user_id)
+
+    def retrieve(self, request, *args, **kwargs):
+        event_id = kwargs.get('event_id')
+        queryset = self.get_queryset()
+
+        # Check if the user has saved the event
+        saved = queryset.filter(event=event_id).exists()
+
+        if saved:
+            return Response({'saved': True}, status=status.HTTP_200_OK)
+        else:
+            return Response({'saved': False}, status=status.HTTP_200_OK)
+        
+
+class CreateCheckoutSessionView(APIView):
+    def post(self, request):
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price_data': {
+                            'currency': 'cad',
+                            'product_data': {
+                                'name': 'Your product name',
+                            },
+                            'unit_amount': 2000,  # Amount in cents
+                        },
+                        'quantity': 1,
+                    },
+                ],
+                mode='payment',
+                success_url='https://your.site.com/success',
+                cancel_url='https://your.site.com/cancel',
+            )
+            return Response({'sessionId': checkout_session.id})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
