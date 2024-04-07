@@ -158,7 +158,10 @@ class TicketCreateAPIView(generics.CreateAPIView):
         response =  super().create(request, *args, **kwargs)
         # Retrieve event details for email content
         event_data = EventSerializer(ticket).data
-        response = {**response.data, **event_data}
+        ticket_created = Ticket.objects.filter(event=event_id).order_by("id").last()
+        ticket_created_data =TicketSerializer(ticket_created).data
+        print(ticket_created_data)
+        response = {**response.data, **event_data, **ticket_created_data}
         # Send email to the user
         ticket_data = response
         user_id = self.request.user.id
@@ -177,12 +180,24 @@ class TicketCreateAPIView(generics.CreateAPIView):
          # Generate PDF
         pdf_buffer = BytesIO()
         pdf_doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+
         elements = []
         data = [
-            ['Event', 'Date', 'Time', 'Location', 'Ticket Number', 'Total Cost'],
-            [ticket_data['title'], ticket_data['date'], f"{ticket_data['start_time']} - {ticket_data['end_time']}", ticket_data['address'], ticket_data['ticket_number'], ticket_data['total_cost']]
+            ['Event', ticket_data['title']],
+            ['Date', ticket_data['date']],
+            ['Time', f"{ticket_data['start_time']} - {ticket_data['end_time']}"],
+            ['Location', ticket_data['address']],
+            ['Ticket Number', ticket_data['ticket_number']],
+            ['Total Cost', ticket_data['total_cost']],
+            ['Order ID', ticket_data['order_id']],
+            ['Invoice ID', ticket_data['invoice_id']]
         ]
-        table = Table(data)
+        
+        # Define the column widths (adjust as needed)
+        col_widths = [120, 300]  # Widths for the two columns
+
+        table = Table(data, colWidths=col_widths)
+
         table_style = TableStyle([
             ('BACKGROUND', (0,0), (-1,0), colors.grey),
             ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
@@ -195,6 +210,7 @@ class TicketCreateAPIView(generics.CreateAPIView):
         ])
         table.setStyle(table_style)
         elements.append(table)
+        # Create PDF document
         pdf_doc.build(elements)
 
         # Attach PDF to email
