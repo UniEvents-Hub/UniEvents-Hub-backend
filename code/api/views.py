@@ -121,7 +121,6 @@ class UserProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         return Response(data)
     
 class UserExistsAPIView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
 
     def get_queryset(self):
