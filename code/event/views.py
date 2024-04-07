@@ -184,6 +184,8 @@ class TicketCreateAPIView(generics.CreateAPIView):
         pdf_buffer = BytesIO()
         pdf_doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
 
+        order = random.randint(4000,6000)
+        invoice = random.randint(10500,12000)
         elements = []
         data = [
             ['Event', ticket_data['title']],
@@ -192,8 +194,8 @@ class TicketCreateAPIView(generics.CreateAPIView):
             ['Location', ticket_data['address']],
             ['Ticket Number', ticket_data['ticket_number']],
             ['Total Cost', ticket_data['total_cost']],
-            ['Order ID', ticket_data['order_id']],
-            ['Invoice ID', ticket_data['invoice_id']]
+            ['Order ID', order],
+            ['Invoice ID', invoice]
         ]
         
         # Define the column widths (adjust as needed)
@@ -239,10 +241,8 @@ class TicketCreateAPIView(generics.CreateAPIView):
 
         ticket_created = Ticket.objects.get(id=ticket_created_data["id"])
         ticket_created.ticket_pdf = f"/media/tickets/{pdf_filename}"
-        ticket_created.order_id  = random.randint(4000,6000)
-        order = ticket_created.order_id
-        ticket_created.invoice_id = random.randint(10500,12000)
-        invoice = ticket_created.invoice_id
+        ticket_created.order_id  = order
+        ticket_created.invoice_id = invoice
         ticket_created.save()
         response["ticket_pdf"] = f"/media/tickets/{pdf_filename}"
         response["order_id"] = order
@@ -272,7 +272,6 @@ class UserTicketAPIView(generics.ListAPIView):
         for ticket, event in zip(Ticket_serializer.data, event_data):
             response_data.append({**ticket, 'event': event})
         
-        print(tice)
         return Response(response_data)
     
 class UserTicketDetailAPIView(generics.RetrieveAPIView):
