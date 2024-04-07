@@ -26,6 +26,7 @@ from django.core.mail.message import EmailMessage
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 import os
+import random
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -146,8 +147,7 @@ class TicketCreateAPIView(generics.CreateAPIView):
         if event_id:
             try:
                 ticket = Event.objects.filter(id=event_id).order_by('total_tickets').first()
-                if ticket.total_tickets-request.data.get("ticket_number")>=0:
-                    ticket.total_tickets -= request.data.get("ticket_number")
+                if ticket.total_tickets_remaining-request.data.get("ticket_number")>=0:
                     ticket.total_tickets_sold  += request.data.get("ticket_number")
                     ticket.total_tickets_remaining -= request.data.get("ticket_number")
                     ticket.save()
@@ -236,11 +236,17 @@ class TicketCreateAPIView(generics.CreateAPIView):
         # Save the PDF file to the specified path
         with open(saving_path, 'wb') as pdf_file:
             pdf_file.write(pdf_buffer.getvalue())
-            
+
         ticket_created = Ticket.objects.get(id=ticket_created_data["id"])
         ticket_created.ticket_pdf = f"/media/tickets/{pdf_filename}"
+        ticket_created.order_id  = random.randint(4000,6000)
+        order = ticket_created.order_id
+        ticket_created.invoice_id = random.randint(10500,12000)
+        invoice = ticket_created.invoice_id
         ticket_created.save()
         response["ticket_pdf"] = f"/media/tickets/{pdf_filename}"
+        response["order_id"] = order
+        response["invoice_id"] = invoice
         
         return Response({"success": "Ticket purchase successful", "ticket": response}, status=status.HTTP_201_CREATED)
 
