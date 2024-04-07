@@ -135,7 +135,7 @@ class UserExistsAPIView(generics.RetrieveAPIView):
         exists = queryset.exists()
 
         if exists:
-            return Response({'saved': True}, status=status.HTTP_200_OK)
+            return Response({'exists': True}, status=status.HTTP_200_OK)
         else:
-            return Response({'saved': False}, status=status.HTTP_200_OK)
+            return Response({'exists': False}, status=status.HTTP_200_OK)
 

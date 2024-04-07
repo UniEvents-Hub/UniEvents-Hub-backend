@@ -25,6 +25,7 @@ from reportlab.lib import colors
 from django.core.mail.message import EmailMessage
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+import os
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -162,7 +163,7 @@ class TicketCreateAPIView(generics.CreateAPIView):
         event_data = EventSerializer(ticket).data
         ticket_created = Ticket.objects.filter(event=event_id).order_by("id").last()
         ticket_created_data =TicketSerializer(ticket_created).data
-        print(ticket_created_data)
+        
         response = {**response.data, **event_data, **ticket_created_data}
         # Send email to the user
         ticket_data = response
@@ -214,6 +215,9 @@ class TicketCreateAPIView(generics.CreateAPIView):
         elements.append(table)
         # Create PDF document
         pdf_doc.build(elements)
+        pdf_filename = f'ticket_{ticket_created_data["id"]}.pdf'  # Customize filename as needed
+        
+        #saving_path = f"../../mediafiles/{pdf_filename}"
 
         # Attach PDF to email
         email = EmailMessage(
@@ -222,13 +226,21 @@ class TicketCreateAPIView(generics.CreateAPIView):
             from_email='shovon6446@gmail.com',
             to=[email]
         )
-        email.attach('ticket.pdf', pdf_buffer.getvalue(), 'application/pdf')
+        email.attach(pdf_filename, pdf_buffer.getvalue(), 'application/pdf')
         email.send(fail_silently=True)
         
         
         #response = {**response.data, **event_data}
-        
-        
+        saving_path = os.path.join(settings.MEDIA_ROOT, "tickets", pdf_filename)
+
+        # Save the PDF file to the specified path
+        with open(saving_path, 'wb') as pdf_file:
+            pdf_file.write(pdf_buffer.getvalue())
+            
+        ticket_created = Ticket.objects.get(id=ticket_created_data["id"])
+        ticket_created.ticket_pdf = f"/media/tickets/{pdf_filename}"
+        ticket_created.save()
+        response["ticket_pdf"] = f"/media/tickets/{pdf_filename}"
         
         return Response({"success": "Ticket purchase successful", "ticket": response}, status=status.HTTP_201_CREATED)
 
@@ -254,6 +266,7 @@ class UserTicketAPIView(generics.ListAPIView):
         for ticket, event in zip(Ticket_serializer.data, event_data):
             response_data.append({**ticket, 'event': event})
         
+        print(tice)
         return Response(response_data)
     
 class UserTicketDetailAPIView(generics.RetrieveAPIView):

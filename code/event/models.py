@@ -61,6 +61,7 @@ class Ticket(models.Model):
     total_cost = models.DecimalField(max_digits=10, decimal_places=2)
     order_id  = models.IntegerField(null=True, blank=True, default=4560)
     invoice_id = models.IntegerField(null=True, blank=True, default=1708)
+    ticket_pdf = models.CharField(null = True, blank = True, max_length=200)
 
     def __str__(self):
         return f"Ticket for {self.event.title} owned by {self.user.username}"
