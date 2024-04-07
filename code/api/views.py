@@ -119,3 +119,24 @@ class UserProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         }
 
         return Response(data)
+    
+class UserExistsAPIView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        # Filter queryset to retrieve the current authenticated user
+        return User.objects.filter(username=self.request.user.username)
+
+    def retrieve(self, request, *args, **kwargs):
+        username = kwargs.get('username')
+        
+        # Check if any user with the specified username exists
+        queryset = User.objects.filter(username=username)
+        exists = queryset.exists()
+
+        if exists:
+            return Response({'saved': True}, status=status.HTTP_200_OK)
+        else:
+            return Response({'saved': False}, status=status.HTTP_200_OK)
+
