@@ -237,6 +237,30 @@ class UserTicketAPIView(generics.ListAPIView):
             response_data.append({**ticket, 'event': event})
         
         return Response(response_data)
+    
+class UserTicketDetailAPIView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Ticket.objects.all()
+    serializer_class = TicketSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            ticket_id = kwargs['pk']  # Retrieve ticket ID from URL kwargs
+            ticket = self.get_queryset().get(id=ticket_id, user=request.user)  # Ensure ticket belongs to current user
+            serializer = self.get_serializer(ticket)
+
+            # Serialize related event data
+            event_data = EventSerializer(ticket.event).data
+
+            # Combine ticket data with event details
+            response_data = {**serializer.data, 'event': event_data}
+            return Response(response_data)
+
+        except Ticket.DoesNotExist:
+            return Response({"detail": "Ticket not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     
 
