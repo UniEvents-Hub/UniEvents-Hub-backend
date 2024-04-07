@@ -147,6 +147,8 @@ class TicketCreateAPIView(generics.CreateAPIView):
                 ticket = Event.objects.filter(id=event_id).order_by('total_tickets').first()
                 if ticket.total_tickets-request.data.get("ticket_number")>=0:
                     ticket.total_tickets -= request.data.get("ticket_number")
+                    ticket.total_tickets_sold  += request.data.get("ticket_number")
+                    ticket.total_tickets_remaining -= request.data.get("ticket_number")
                     ticket.save()
                 else:
                     return Response({"error": "No available tickets for this event"}, status=status.HTTP_400_BAD_REQUEST)

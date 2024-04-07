@@ -26,7 +26,9 @@ class Event(models.Model):
     sharable_link = models.URLField(blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True) 
     total_tickets = models.IntegerField(blank=True, null=True)  
-    event_status = models.CharField(max_length=50, blank=True, null=True)     
+    event_status = models.CharField(max_length=50, blank=True, null=True)
+    total_tickets_sold = models.IntegerField(blank=True, null=True, default=0)
+    total_tickets_remaining = models.IntegerField(blank=True, null=True, default=0)      
     
     def __str__(self):
         return self.title
