@@ -57,6 +57,8 @@ class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     ticket_number = models.IntegerField()
     total_cost = models.DecimalField(max_digits=10, decimal_places=2)
+    order_id  = models.IntegerField(null=True, blank=True, default=4560)
+    invoice_id = models.IntegerField(null=True, blank=True, default=1708)
 
     def __str__(self):
         return f"Ticket for {self.event.title} owned by {self.user.username}"
