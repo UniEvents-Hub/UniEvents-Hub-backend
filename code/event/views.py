@@ -27,8 +27,19 @@ from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 import os
 import random
+import numpy as np
+import matplotlib
+import matplotlib.image as image
+from PIL import Image
+
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+
+
+
+
 
 class IsEventCreator(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -103,6 +114,7 @@ class EventUpdateAPIView(UpdateAPIView):
             # Create a ContentFile instance with the image data
             file_name = f"{instance.id}_event_banner.png"
             content_file = ContentFile(image_data, name=file_name)
+            
 
             # Update the request data with the ContentFile instance
             request.data['banner'] = content_file
@@ -417,27 +429,57 @@ class ImageListCreateView(generics.ListCreateAPIView):
     serializer_class = ImageGallerySerializer
     queryset = ImageGallery.objects.all()
     parser_classes = (MultiPartParser, FormParser)
+    
+    def read_as_compressed(self,U, S, VT, k):
+        A = np.zeros((U.shape[0], VT.shape[1]))
+        for i in range(k):
+            U_i = U[:,[i]]
+            VT_i = np.array([VT[i]])
+            A += S[i] * (U_i @ VT_i)
+        return A
+    def svdCompression(self,imagepath,compression_rate):
+        imagepath = f"../mediafiles/{imagepath}"
+        A = image.imread(imagepath)
+        R = A[:,:,0] / 0xff
+        G = A[:,:,1] / 0xff
+        B = A[:,:,2] / 0xff
+
+        R_U, R_S, R_VT = np.linalg.svd(R)
+        G_U, G_S, G_VT = np.linalg.svd(G)
+        B_U, B_S, B_VT = np.linalg.svd(B)
+
+        relative_rank = 0.1
+        max_rank = int(relative_rank * min(R.shape[0], R.shape[1]))
+        k = compression_rate
+        rank = int((k/100)*max_rank)
+
+
+        R_compressed = self.read_as_compressed(R_U, R_S, R_VT, rank)
+        G_compressed = self.read_as_compressed(G_U, G_S, G_VT, rank)
+        B_compressed = self.read_as_compressed(B_U, B_S, B_VT, rank)
+
+        compressed_float = np.dstack((R_compressed, G_compressed, B_compressed))
+        compressed = (np.minimum(compressed_float, 1.0) * 0xff).astype(np.uint8)
+        return compressed
 
     def post(self, request, *args, **kwargs):
         event_id = request.data.get('event_id', None)
         image_gallery_data = {'event': event_id}
+
+        #svdCompression(base64_image,100)
         serializer = ImageGallerySerializer(data=request.data)
+       
         if serializer.is_valid():
             image_gallery_instance = serializer.save()
-            base64_image = request.data.get('image', None)
-            if base64_image and isinstance(base64_image, str):
-                # Decode the base64 image data
-                image_data = base64.b64decode(base64_image)
-                # Create a ContentFile instance with the image data
-                file_name = f"{image_gallery_instance.id}_event_banner.png"
-                content_file = ContentFile(image_data, name=file_name)
-                # Assign the uploaded image to the ImageGallery instance
-                image_gallery_instance.image = content_file
-                image_gallery_instance.save()
+            
+            compressed = self.svdCompression(image_gallery_instance.image,30)
+
+            
+            image.imsave(f"../mediafiles/{image_gallery_instance.image.name}", compressed)
             serializer = ImageGallerySerializer(image_gallery_instance)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class ImageRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
