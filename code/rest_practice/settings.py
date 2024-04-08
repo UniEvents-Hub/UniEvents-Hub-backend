@@ -122,8 +122,8 @@ WSGI_APPLICATION = 'rest_practice.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 
-'''
-This one is for the local pc
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -134,18 +134,7 @@ DATABASES = {
         'PORT': '3306',  # Specify your MySQL port (usually '3306')
     }
 }
-'''
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv("DB_NAME"),  # Specify your database name
-        'USER': os.getenv("DB_USER"),  # Specify your MySQL username
-        'PASSWORD': os.getenv("DB_PWD"),  # Specify your MySQL password
-        'HOST': os.getenv("DB_HOST"),  # Specify your MySQL host (usually 'localhost')
-        'PORT': os.getenv("DB_PORT"),  # Specify your MySQL port (usually '3306')
-    }
-}
 
 
 # Password validation
