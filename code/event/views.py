@@ -2,8 +2,8 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny,IsAuthenticated  # Import AllowAny permission
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
-from .models import Event, Ticket, Saved
-from .serializers import EventSerializer, TicketSerializer,SavedSerializer
+from .models import Event, Ticket, Saved, ImageGallery
+from .serializers import EventSerializer, TicketSerializer,SavedSerializer, ImageGallerySerializer
 from rest_framework.response import Response
 import json
 from rest_framework.generics import UpdateAPIView
@@ -407,3 +407,50 @@ class CreateCheckoutSessionView(APIView):
             return Response({'sessionId': checkout_session.id})
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+        
+
+
+class ImageListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ImageGallerySerializer
+    queryset = ImageGallery.objects.all()
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        event_id = request.data.get('event_id', None)
+        image_gallery_data = {'event': event_id}
+        serializer = ImageGallerySerializer(data=request.data)
+        if serializer.is_valid():
+            image_gallery_instance = serializer.save()
+            base64_image = request.data.get('image', None)
+            if base64_image and isinstance(base64_image, str):
+                # Decode the base64 image data
+                image_data = base64.b64decode(base64_image)
+                # Create a ContentFile instance with the image data
+                file_name = f"{image_gallery_instance.id}_event_banner.png"
+                content_file = ContentFile(image_data, name=file_name)
+                # Assign the uploaded image to the ImageGallery instance
+                image_gallery_instance.image = content_file
+                image_gallery_instance.save()
+            serializer = ImageGallerySerializer(image_gallery_instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ImageRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ImageGallerySerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_queryset(self):
+        event_id = self.kwargs.get('pk')
+        return ImageGallery.objects.filter(event=event_id)
+
+    def get(self, request, *args, **kwargs):
+        print("Hi")
+        instance2 = self.get_queryset()
+        serializer2 = ImageGallerySerializer(instance2,many=True)
+        return Response(serializer2.data, status=status.HTTP_200_OK)
+        

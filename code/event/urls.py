@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import EventListCreateAPIView, EventRetrieveAPIView, EventListAPIView, EventUpdateAPIView, UserEventRetrieveAPIView, TicketCreateAPIView,UserTicketAPIView
-from .views import SavedCreateAPIView,UserSavedAPIView,UserUnsaveAPIView,CreateCheckoutSessionView, CheckSavedAPIView,UserTicketDetailAPIView
+from .views import SavedCreateAPIView,UserSavedAPIView,UserUnsaveAPIView,CreateCheckoutSessionView, CheckSavedAPIView,UserTicketDetailAPIView, ImageListCreateView, ImageRetrieveUpdateDestroyView
 
 urlpatterns = [
     path('eventcreate/', EventListCreateAPIView.as_view(), name='event-list-create'),
@@ -15,5 +15,7 @@ urlpatterns = [
     path('eventunsave/<int:pk>/', UserUnsaveAPIView.as_view(), name="unsave-event"),
     path('stripepayment/', CreateCheckoutSessionView.as_view(), name='stripe_checkout_session'), 
     path('checksaved/<int:event_id>/', CheckSavedAPIView.as_view(), name='check_saved'),
-    path('ticketdetail/<int:pk>/', UserTicketDetailAPIView.as_view(), name='user-ticket-detail'),     
+    path('ticketdetail/<int:pk>/', UserTicketDetailAPIView.as_view(), name='user-ticket-detail'),
+    path('images/', ImageListCreateView.as_view(), name='image-list-create'),
+    path('getimages/<int:pk>/', ImageRetrieveUpdateDestroyView.as_view(), name='image-retrieve-update-destroy'),        
 ]

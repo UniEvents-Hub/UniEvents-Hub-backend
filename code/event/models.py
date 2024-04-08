@@ -74,3 +74,8 @@ class Saved(models.Model):
     
     def __str__(self):
         return f"Saved for {self.event.title} owned by {self.user.username}"
+    
+class ImageGallery(models.Model):
+    id = models.AutoField(primary_key=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='gallery_images', null=True, blank=True)
