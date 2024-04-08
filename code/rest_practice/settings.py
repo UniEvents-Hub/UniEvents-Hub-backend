@@ -14,11 +14,11 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
-
-STRIPE_SECRET_KEY="pk_test_51Oxm0MIeXuIbhfHwnkGxrfUEwVLWENG1P0hN7sMgqng00WPvkqrqtCa9J8KR4Sz8iieB19l8UNdBKdqVIk3nrp9O00x9j7lG6g"
-STRIPE_PUBLISHABLE_KEY="sk_test_51Oxm0MIeXuIbhfHwtDoQq2YwpDie4nnnEg3kJaqzdg1DvQFIgblMhQjnLCoAAeRDa8GITU8cwvdlphr2OaaKArc1008tmqsE5g"
-
 load_dotenv()
+
+STRIPE_SECRET_KEY=os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY=os.getenv("STRIPE_PUBLISHABLE_KEY")
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -48,7 +48,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'shovon6446@gmail.com'
-EMAIL_HOST_PASSWORD = 'eyrfghbhavcpqkjc'
+EMAIL_HOST_PASSWORD = os.getenv("email_password")
+
 
 
 
