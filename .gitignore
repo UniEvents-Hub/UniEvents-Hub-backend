@@ -1,2 +1,4 @@
 myvenv/
 db.sqlite3
+**/__pycache__/
+mediafiles/

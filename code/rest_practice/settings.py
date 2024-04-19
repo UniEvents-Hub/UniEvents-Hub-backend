@@ -14,11 +14,21 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
-
 load_dotenv()
+
+STRIPE_SECRET_KEY=os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY=os.getenv("STRIPE_PUBLISHABLE_KEY")
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Actual directory user files go to
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'mediafiles')
+
+# URL used to access the media
+MEDIA_URL = '/media/'
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,6 +42,14 @@ DEBUG = True
 
 #ALLOWED_HOSTS = ['f14f-68-148-141-10.ngrok-free.app']
 ALLOWED_HOSTS = ["*"]
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'shovon6446@gmail.com'
+EMAIL_HOST_PASSWORD = 'eyrfghbhavcpqkjc'
+
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -101,6 +119,9 @@ WSGI_APPLICATION = 'rest_practice.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -111,6 +132,7 @@ DATABASES = {
         'PORT': '3306',  # Specify your MySQL port (usually '3306')
     }
 }
+
 
 
 # Password validation

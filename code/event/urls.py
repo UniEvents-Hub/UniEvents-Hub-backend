@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import EventListCreateAPIView, EventRetrieveAPIView, EventListAPIView, EventUpdateAPIView, UserEventRetrieveAPIView, TicketCreateAPIView,UserTicketAPIView
+from .views import SavedCreateAPIView,UserSavedAPIView,UserUnsaveAPIView,CreateCheckoutSessionView, CheckSavedAPIView,UserTicketDetailAPIView, ImageListCreateView, ImageRetrieveUpdateDestroyView
 
 urlpatterns = [
     path('eventcreate/', EventListCreateAPIView.as_view(), name='event-list-create'),
@@ -8,5 +9,13 @@ urlpatterns = [
     path('userspecificevent/', UserEventRetrieveAPIView.as_view(), name='event-detail'),   
     path('eventupdate/<int:pk>/', EventUpdateAPIView.as_view(), name='event-update'),
     path('buyticket/', TicketCreateAPIView.as_view(), name="buy-ticket"),
-    path('getticket/', UserTicketAPIView.as_view(), name="get-ticket")
+    path('getticket/', UserTicketAPIView.as_view(), name="get-ticket"),
+    path('eventsave/', SavedCreateAPIView.as_view(), name="save-event"),
+    path('getsaved/', UserSavedAPIView.as_view(), name="user-saved"),
+    path('eventunsave/<int:pk>/', UserUnsaveAPIView.as_view(), name="unsave-event"),
+    path('stripepayment/', CreateCheckoutSessionView.as_view(), name='stripe_checkout_session'), 
+    path('checksaved/<int:event_id>/', CheckSavedAPIView.as_view(), name='check_saved'),
+    path('ticketdetail/<int:pk>/', UserTicketDetailAPIView.as_view(), name='user-ticket-detail'),
+    path('images/', ImageListCreateView.as_view(), name='image-list-create'),
+    path('getimages/<int:pk>/', ImageRetrieveUpdateDestroyView.as_view(), name='image-retrieve-update-destroy'),        
 ]
