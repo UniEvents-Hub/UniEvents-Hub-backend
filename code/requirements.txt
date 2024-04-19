@@ -15,7 +15,6 @@ fonttools==4.51.0
 idna==3.6
 kiwisolver==1.4.5
 matplotlib==3.8.4
-mysqlclient==2.2.4
 numpy==1.26.4
 packaging==24.0
 pillow==10.2.0

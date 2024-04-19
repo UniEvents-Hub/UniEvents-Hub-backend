@@ -472,7 +472,7 @@ class ImageListCreateView(generics.ListCreateAPIView):
         if serializer.is_valid():
             image_gallery_instance = serializer.save()
             
-            compressed = self.svdCompression(image_gallery_instance.image,30)
+            compressed = self.svdCompression(image_gallery_instance.image,90)
 
             
             image.imsave(f"../mediafiles/{image_gallery_instance.image.name}", compressed)
